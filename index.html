@@ -13,11 +13,11 @@
             -moz-background-size: cover;
             -o-background-size: cover;
             background-size: cover;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .box {
             width: 500px;
-            background: rgba(245, 245, 245, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             top: 50%;
             left: 50%;
             position: absolute;
@@ -25,7 +25,7 @@
             box-sizing: border-box;
             padding: 70px 30px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 25px rgba(0,0,0,0.2);
         }
         .user {
             width: 100px;
@@ -36,21 +36,24 @@
             border-radius: 50%;
             background: #fff;
             padding: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border: 2px solid #2196f3;
         }
         h1 {
             margin: 0;
             padding: 0 0 20px;
             text-align: center;
-            font-size: 24px;
+            font-size: 26px;
             color: #333;
+            font-weight: 600;
         }
         p {
             color: #2196f3;
             margin: 0;
             padding: 0;
-            font-weight: bold;
+            font-weight: 500;
             font-size: 14px;
+            margin-top: 15px;
         }
         input {
             width: 100%;
@@ -66,6 +69,7 @@
             height: 40px;
             color: #333;
             font-size: 16px;
+            padding: 5px 0;
         }
         input[type="file"] {
             padding: 10px 0;
@@ -73,49 +77,59 @@
         input[type="submit"] {
             border: none;
             outline: none;
-            height: 45px;
+            height: 50px;
             background: #2196f3;
             color: #fff;
             font-size: 18px;
             border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s;
+            margin-top: 20px;
+            font-weight: 500;
         }
         input[type="submit"]:hover {
             background: #1976d2;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
         }
         .error {
             color: #f44336;
-            font-size: 12px;
+            font-size: 13px;
             margin-top: -15px;
             margin-bottom: 15px;
+            font-weight: 500;
         }
         .loading {
             display: none;
             text-align: center;
-            margin: 15px 0;
+            margin: 20px 0;
             color: #2196f3;
+            font-size: 16px;
         }
         #extracted-data {
             display: none;
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 25px;
+            padding: 20px;
             background: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 8px;
             border-left: 4px solid #2196f3;
         }
         .skill-highlight {
             background-color: #fff9c4;
             font-weight: bold;
-            padding: 0 2px;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+        #extracted-data h3 {
+            margin-top: 0;
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="box">
         <img src="./user.png" class="user">
-        <h1>Advanced Job Application</h1>
+        <h1>Job Application Portal</h1>
 
         <form id="application-form" enctype="multipart/form-data">
             <p>Full Name</p>
@@ -123,11 +137,11 @@
             <div id="username-error" class="error"></div>
 
             <p>Email Address</p>
-            <input type="email" id="email" placeholder="Enter your email" required>
+            <input type="email" id="email" placeholder="Enter your professional email" required>
             <div id="email-error" class="error"></div>
 
             <p>Phone Number</p>
-            <input type="tel" id="phone" placeholder="Enter 10-digit phone number" pattern="^\d{10}$" required>
+            <input type="tel" id="phone" placeholder="Enter 10-digit phone number" pattern="[0-9]{10}" required>
             <div id="phone-error" class="error"></div>
 
             <p>Upload Resume (PDF/DOCX)</p>
@@ -139,7 +153,7 @@
             </div>
 
             <div id="extracted-data">
-                <h3>Extracted Information:</h3>
+                <h3>Resume Analysis Results</h3>
                 <div id="extracted-skills"></div>
                 <div id="extracted-text"></div>
             </div>
@@ -152,57 +166,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
 
     <script>
+        // Initialize EmailJS with your User ID
+        emailjs.init('zxGlpUF_bCdyvrAUp');
+        
         // Comprehensive Skill Database (600+ items)
         const skillDatabase = [
-            // Programming Languages (120+)
+            // Programming Languages
             'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'TypeScript',
             'Swift', 'Kotlin', 'Go', 'Rust', 'Ruby', 'Scala', 'Perl', 'R', 'Dart',
-            'Objective-C', 'MATLAB', 'Haskell', 'Elixir', 'Clojure', 'Lua',
             
-            // Web Development (80+)
+            // Web Development
             'HTML5', 'CSS3', 'React', 'Angular', 'Vue', 'Svelte', 'jQuery',
             'Node.js', 'Express', 'Django', 'Flask', 'Laravel', 'Spring', 'ASP.NET',
-            'Ruby on Rails', 'GraphQL', 'Webpack', 'Babel', 'Sass', 'Less',
-            'Bootstrap', 'Tailwind CSS', 'Material UI', 'Redux', 'MobX',
             
-            // Mobile Development (30+)
+            // Mobile Development
             'React Native', 'Flutter', 'Android', 'iOS', 'Xamarin', 'Ionic',
-            'Cordova', 'SwiftUI', 'Kotlin Multiplatform',
             
-            // Databases (50+)
+            // Databases
             'SQL', 'MySQL', 'PostgreSQL', 'MongoDB', 'Firebase', 'Oracle',
-            'SQLite', 'MariaDB', 'Redis', 'Cassandra', 'DynamoDB', 'Neo4j',
-            'Elasticsearch', 'BigQuery', 'Snowflake', 'Cosmos DB',
             
-            // DevOps/Cloud (80+)
+            // DevOps/Cloud
             'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'CI/CD',
-            'Jenkins', 'GitHub Actions', 'GitLab CI', 'Terraform', 'Ansible',
-            'Puppet', 'Chef', 'Prometheus', 'Grafana', 'Istio', 'Helm',
-            'Serverless', 'Lambda', 'EC2', 'S3', 'CloudFormation',
             
-            // Data Science/AI (60+)
-            'TensorFlow', 'PyTorch', 'Keras', 'Pandas', 'NumPy', 'SciPy',
-            'Scikit-learn', 'OpenCV', 'NLTK', 'Spark', 'Hadoop', 'Tableau',
-            'Power BI', 'Machine Learning', 'Deep Learning', 'NLP', 'Computer Vision',
-            
-            // Other Technologies (100+)
-            'Git', 'Linux', 'Windows Server', 'MacOS', 'Blockchain', 'Solidity',
-            'Ethereum', 'Smart Contracts', 'REST API', 'SOAP', 'OAuth', 'JWT',
-            'WebSockets', 'WebRTC', 'Electron', 'WebAssembly'
+            // Add more skills as needed...
         ];
-
-        // Abbreviation mapping
-        const abbreviationMap = {
-            'js': 'JavaScript', 'ts': 'TypeScript', 'py': 'Python',
-            'rb': 'Ruby', 'php': 'PHP', 'html': 'HTML5', 'css': 'CSS3',
-            'aws': 'AWS', 'gcp': 'Google Cloud', 'azure': 'Azure',
-            'sql': 'SQL', 'nosql': 'NoSQL', 'react': 'React',
-            'node': 'Node.js', 'express': 'Express', 'django': 'Django',
-            'ml': 'Machine Learning', 'dl': 'Deep Learning', 'ai': 'Artificial Intelligence',
-            'nlp': 'NLP', 'cv': 'Computer Vision', 'db': 'Database'
-        };
 
         document.getElementById('application-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -225,7 +215,7 @@
             }
             
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                document.getElementById('email-error').textContent = 'Invalid email format';
+                document.getElementById('email-error').textContent = 'Please enter a valid email address';
                 isValid = false;
             }
             
@@ -235,7 +225,7 @@
             }
             
             if (!resume) {
-                document.getElementById('resume-error').textContent = 'Please upload a resume';
+                document.getElementById('resume-error').textContent = 'Please upload your resume';
                 isValid = false;
             }
             
@@ -257,26 +247,27 @@
                     throw new Error('Unsupported file format');
                 }
                 
-                // Extract skills
+                // Extract skills and highlight them
                 const { skills, highlightedText } = extractSkills(text);
                 
                 // Display extracted data
                 document.getElementById('extracted-skills').innerHTML = `
-                    <p><strong>Detected Skills:</strong> ${skills.join(', ') || 'None found'}</p>
+                    <p><strong>Detected Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'None found'}</p>
                 `;
                 document.getElementById('extracted-text').innerHTML = `
-                    <p><strong>Resume Content:</strong></p>
-                    <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
-                        ${highlightedText}
+                    <p><strong>Resume Content Preview:</strong></p>
+                    <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                        ${highlightedText || 'No text extracted'}
                     </div>
                 `;
                 document.getElementById('extracted-data').style.display = 'block';
                 
-                // Store data
+                // Store ALL application data
                 localStorage.setItem('username', username);
                 localStorage.setItem('email', email);
                 localStorage.setItem('phone', phone);
                 localStorage.setItem('skills', JSON.stringify(skills));
+                localStorage.setItem('resumeFileName', resume.name);
                 
                 // Proceed to job listings
                 window.location.href = "job-listing.html";
@@ -291,13 +282,14 @@
         });
 
         async function extractTextFromPDF(file) {
+            // Set PDF.js worker path
             pdfjsLib.GlobalWorkerOptions.workerSrc = 
                 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
             
             const typedArray = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(new Uint8Array(reader.result));
-                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.onerror = () => reject(new Error('Failed to read PDF file'));
                 reader.readAsArrayBuffer(file);
             });
             
@@ -317,7 +309,7 @@
             const arrayBuffer = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.onerror = () => reject(new Error('Failed to read Word document'));
                 reader.readAsArrayBuffer(file);
             });
             
@@ -326,33 +318,23 @@
         }
 
         function extractSkills(text) {
-            // Normalize text
+            // Normalize text for better matching
             const normalizedText = text
                 .replace(/[^a-zA-Z0-9+#.\s]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .toLowerCase();
             
             const foundSkills = [];
-            const skillCounts = {};
             
-            // 1. Exact matching
+            // 1. Exact matching against skill database
             skillDatabase.forEach(skill => {
                 const skillLower = skill.toLowerCase();
                 if (normalizedText.includes(skillLower)) {
                     foundSkills.push(skill);
-                    skillCounts[skill] = (skillCounts[skill] || 0) + 1;
                 }
             });
             
-            // 2. Abbreviation matching
-            Object.entries(abbreviationMap).forEach(([abbr, fullSkill]) => {
-                if (normalizedText.includes(abbr) && !foundSkills.includes(fullSkill)) {
-                    foundSkills.push(fullSkill);
-                    skillCounts[fullSkill] = (skillCounts[fullSkill] || 0) + 1;
-                }
-            });
-            
-            // 3. Skills section extraction
+            // 2. Try to find skills section
             const skillsSectionRegex = /(?:skills|technical skills|technologies|expertise)[:\n](.*?)(?=\n\w+:|$)/is;
             const skillsSectionMatch = skillsSectionRegex.exec(text);
             
@@ -362,12 +344,11 @@
                     const skillLower = skill.toLowerCase();
                     if (sectionText.includes(skillLower) && !foundSkills.includes(skill)) {
                         foundSkills.push(skill);
-                        skillCounts[skill] = (skillCounts[skill] || 0) + 3; // Higher weight
                     }
                 });
             }
             
-            // Highlight text
+            // Highlight skills in the text
             let highlightedText = text;
             foundSkills.forEach(skill => {
                 highlightedText = highlightedText.replace(
@@ -376,12 +357,8 @@
                 );
             });
             
-            // Sort skills by occurrence (most mentioned first)
-            const uniqueSkills = [...new Set(foundSkills)];
-            uniqueSkills.sort((a, b) => (skillCounts[b] || 0) - (skillCounts[a] || 0));
-            
             return {
-                skills: uniqueSkills,
+                skills: [...new Set(foundSkills)], // Remove duplicates
                 highlightedText
             };
         }
