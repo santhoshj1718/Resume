@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +27,7 @@
             box-sizing: border-box;
             padding: 70px 30px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
 
         .user {
@@ -40,7 +39,7 @@
             border-radius: 50%;
             background: #fff;
             padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
         h1 {
@@ -98,9 +97,15 @@
             margin-top: -15px;
             margin-bottom: 15px;
         }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+            color: #2196f3;
+        }
     </style>
 </head>
-
 <body>
     <div class="box">
         <img src="./user.png" class="user">
@@ -122,13 +127,22 @@
             <p>Upload Resume (PDF or Word)</p>
             <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
             <div id="resume-error" class="error"></div>
+            
+            <div id="loading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Processing your resume...
+            </div>
 
             <input type="submit" value="Apply Now">
         </form>
     </div>
 
+    <!-- Load PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <!-- Load Font Awesome for loading spinner -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
     <script>
-        document.getElementById('application-form').addEventListener('submit', function (event) {
+        document.getElementById('application-form').addEventListener('submit', async function (event) {
             event.preventDefault();
             
             // Reset error messages
@@ -171,38 +185,41 @@
             
             if (!isValid) return;
             
-            // Store user data in localStorage
-            localStorage.setItem('username', username);
-            localStorage.setItem('email', email);
-            localStorage.setItem('phone', phone);
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
             
-            // Process resume
-            if (resume.name.endsWith('.pdf')) {
-                processPDF(resume);
-            } else if (resume.name.endsWith('.doc') || resume.name.endsWith('.docx')) {
-                // For Word docs, we'll simulate text extraction
-                simulateWordProcessing(resume);
+            try {
+                // Store user data in localStorage
+                localStorage.setItem('username', username);
+                localStorage.setItem('email', email);
+                localStorage.setItem('phone', phone);
+                
+                let text = '';
+                
+                // Process PDF
+                if (resume.name.endsWith('.pdf')) {
+                    text = await extractTextFromPDF(resume);
+                } 
+                // Process Word (simulated - in real app use mammoth.js)
+                else if (resume.name.endsWith('.doc') || resume.name.endsWith('.docx')) {
+                    text = await simulateWordProcessing(resume);
+                }
+                
+                const skills = extractSkills(text);
+                localStorage.setItem('skills', JSON.stringify(skills));
+                
+                // Redirect to job listing page
+                window.location.href = "job-listing.html";
+                
+            } catch (error) {
+                console.error("Error processing resume:", error);
+                document.getElementById('resume-error').textContent = 'Error processing your resume. Please try again.';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         });
         
-        function processPDF(file) {
-            // Load PDF.js library dynamically
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js';
-            script.onload = function() {
-                extractTextFromPDF(file).then(text => {
-                    const skills = extractSkills(text);
-                    localStorage.setItem('skills', JSON.stringify(skills));
-                    window.location.href = "job-listing.html";
-                }).catch(err => {
-                    console.error("Error processing PDF:", err);
-                    alert("Error processing your resume. Please try again.");
-                });
-            };
-            document.head.appendChild(script);
-        }
-        
-        function extractTextFromPDF(file) {
+        async function extractTextFromPDF(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
@@ -227,40 +244,60 @@
                         Promise.all(pagePromises).then(() => resolve(totalText));
                     }).catch(reject);
                 };
-                reader.onerror = reject;
+                reader.onerror = () => reject(new Error('Error reading file'));
                 reader.readAsArrayBuffer(file);
             });
         }
         
         function simulateWordProcessing(file) {
-            // In a real app, you would use a library like mammoth.js for Word docs
-            // Here we'll simulate it with a timeout
-            setTimeout(() => {
-                // Simulated resume text with some skills
-                const simulatedText = `
-                    John Doe's Resume
-                    Skills: JavaScript, Python, React, Node.js, HTML, CSS
-                    Experience: 5 years as a web developer
-                    Education: Computer Science Degree
-                `;
-                
-                const skills = extractSkills(simulatedText);
-                localStorage.setItem('skills', JSON.stringify(skills));
-                window.location.href = "job-listing.html";
-            }, 1000);
+            return new Promise((resolve) => {
+                // Simulate processing delay
+                setTimeout(() => {
+                    // Simulated resume text with skills
+                    const simulatedText = `
+                        John Doe's Resume
+                        SKILLS:
+                        - JavaScript, React, Node.js
+                        - Python, Django
+                        - HTML5, CSS3
+                        - Git, Docker
+                        
+                        EXPERIENCE:
+                        - 5 years as Full Stack Developer
+                        - Built web applications using MERN stack
+                        
+                        EDUCATION:
+                        - B.Tech in Computer Science
+                    `;
+                    resolve(simulatedText);
+                }, 1500);
+            });
         }
         
         function extractSkills(text) {
-            const allSkills = ['JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 
-                             'HTML', 'CSS', 'SQL', 'Git', 'Docker', 'AWS', 'PHP', 'Ruby',
-                             'Angular', 'Vue', 'TypeScript', 'MongoDB', 'PostgreSQL'];
+            // Comprehensive list of technical skills to look for
+            const allSkills = [
+                'JavaScript', 'Python', 'Java', 'C', 'C++', 'C#', 'PHP', 'Ruby',
+                'HTML', 'CSS', 'React', 'Angular', 'Vue', 'Node.js', 'Express',
+                'Django', 'Flask', 'Spring', 'Laravel', 'Ruby on Rails',
+                'SQL', 'MySQL', 'PostgreSQL', 'MongoDB', 'Firebase',
+                'Git', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud',
+                'REST API', 'GraphQL', 'Webpack', 'Babel', 'TypeScript',
+                'Machine Learning', 'Data Science', 'Artificial Intelligence',
+                'Linux', 'Windows', 'MacOS', 'Android', 'iOS'
+            ];
             
+            // Convert text to lowercase for case-insensitive matching
+            const lowerText = text.toLowerCase();
+            
+            // Find skills mentioned in the resume
             const foundSkills = allSkills.filter(skill => 
-                new RegExp(`\\b${skill}\\b`, 'i').test(text)
+                lowerText.includes(skill.toLowerCase())
             );
             
-            return foundSkills.length > 0 ? foundSkills : ['No specific skills detected'];
+            // If no skills found, return some default skills
+            return foundSkills.length > 0 ? foundSkills : ['General IT', 'Problem Solving'];
         }
     </script>
 </body>
-    </html>
+</html>
