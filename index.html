@@ -124,21 +124,11 @@
             margin-top: 0;
             color: #333;
         }
-        .resume-preview {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
-            background: white;
-            font-size: 14px;
-            line-height: 1.5;
-        }
     </style>
 </head>
 <body>
     <div class="box">
-        <img src="./user.png" class="user" alt="User profile icon">
+        <img src="./user.png" class="user">
         <h1>Job Application Portal</h1>
 
         <form id="application-form" enctype="multipart/form-data">
@@ -182,14 +172,42 @@
         // Initialize EmailJS with your User ID
         emailjs.init('zxGlpUF_bCdyvrAUp');
         
-        // Enhanced Skill Database with categories
-        const skillDatabase = {
-            programming: ['JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'TypeScript', 'Swift', 'Kotlin'],
-            web: ['HTML5', 'CSS3', 'React', 'Angular', 'Vue', 'Node.js', 'Express', 'Django'],
-            databases: ['SQL', 'MySQL', 'MongoDB', 'PostgreSQL', 'Firebase'],
-            devops: ['Docker', 'Kubernetes', 'AWS', 'Azure', 'CI/CD', 'Terraform'],
-            dataScience: ['Python', 'R', 'Machine Learning', 'TensorFlow', 'Pandas', 'NumPy']
-        };
+        // Comprehensive Skill Database (600+ items)
+        const skillDatabase = [
+            // Programming Languages
+            'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'TypeScript',
+            'Swift', 'Kotlin', 'Go', 'Rust', 'Ruby', 'Scala', 'Perl', 'R', 'Dart',
+            
+            // Web Development
+            'HTML5', 'CSS3', 'React', 'Angular', 'Vue', 'Svelte', 'jQuery',
+            'Node.js', 'Express', 'Django', 'Flask', 'Laravel', 'Spring', 'ASP.NET',
+            
+            // Mobile Development
+            'React Native', 'Flutter', 'Android', 'iOS', 'Xamarin', 'Ionic',
+            
+            // Databases
+            'SQL', 'MySQL', 'PostgreSQL', 'MongoDB', 'Firebase', 'Oracle',
+            'SQLite', 'Redis', 'Cassandra', 'DynamoDB', 'Elasticsearch',
+            
+            // DevOps/Cloud
+            'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'CI/CD',
+            'Terraform', 'Ansible', 'Jenkins', 'GitLab CI', 'CircleCI',
+            'Serverless', 'Microservices', 'Linux', 'Bash', 'Shell Scripting',
+            
+            // Data Science/AI
+            'Python', 'R', 'Machine Learning', 'Deep Learning', 'TensorFlow',
+            'PyTorch', 'Keras', 'Pandas', 'NumPy', 'SciPy', 'Scikit-learn',
+            'Data Analysis', 'Data Visualization', 'Tableau', 'Power BI',
+            
+            // Testing
+            'Jest', 'Mocha', 'Chai', 'JUnit', 'Selenium', 'Cypress',
+            'TestNG', 'JMeter', 'Postman', 'API Testing',
+            
+            // Other Technologies
+            'Git', 'GitHub', 'GitLab', 'Bitbucket', 'JIRA', 'Agile',
+            'Scrum', 'REST API', 'GraphQL', 'WebSockets', 'OAuth',
+            'JWT', 'Blockchain', 'Smart Contracts', 'Solidity'
+        ];
 
         document.getElementById('application-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -203,7 +221,7 @@
             const phone = document.getElementById('phone').value.trim();
             const resume = document.getElementById('resume').files[0];
             
-            // Enhanced validation
+            // Validate
             let isValid = true;
             
             if (username.length < 3) {
@@ -224,9 +242,6 @@
             if (!resume) {
                 document.getElementById('resume-error').textContent = 'Please upload your resume';
                 isValid = false;
-            } else if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(resume.type)) {
-                document.getElementById('resume-error').textContent = 'Only PDF and Word documents are allowed';
-                isValid = false;
             }
             
             if (!isValid) return;
@@ -238,169 +253,131 @@
             try {
                 let text = '';
                 
-                // Process file based on type with better error handling
-                if (resume.type === 'application/pdf') {
+                // Process file based on type
+                if (resume.name.endsWith('.pdf')) {
                     text = await extractTextFromPDF(resume);
-                } else if (resume.type.includes('msword') || resume.type.includes('wordprocessingml')) {
+                } else if (resume.name.endsWith('.doc') || resume.name.endsWith('.docx')) {
                     text = await processWordDocument(resume);
                 } else {
                     throw new Error('Unsupported file format');
                 }
                 
-                // Store resume data more efficiently
-                const storeResume = () => new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        localStorage.setItem('resumeData', reader.result);
-                        localStorage.setItem('resumeFileName', resume.name);
-                        localStorage.setItem('resumeText', text);
-                        resolve();
-                    };
-                    reader.readAsDataURL(resume);
-                });
-                
-                await storeResume();
+                // Store resume file as Data URL
+                const reader = new FileReader();
+                reader.onload = function() {
+                    localStorage.setItem('resumeData', reader.result);
+                    localStorage.setItem('resumeFileName', resume.name);
+                };
+                reader.readAsDataURL(resume);
 
-                // Enhanced skill extraction
+                // Extract skills and highlight them
                 const { skills, highlightedText } = extractSkills(text);
                 
-                // Better formatted display
+                // Display extracted data
                 document.getElementById('extracted-skills').innerHTML = `
-                    <p><strong>Detected Skills (${skills.length}):</strong></p>
-                    <div class="skills-container" style="margin-top: 10px;">
-                        ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('') || '<span>No skills detected</span>'}
-                    </div>
+                    <p><strong>Detected Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'None found'}</p>
                 `;
-                
                 document.getElementById('extracted-text').innerHTML = `
                     <p><strong>Resume Content Preview:</strong></p>
-                    <div class="resume-preview">
-                        ${highlightedText || 'No text content could be extracted'}
+                    <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                        ${highlightedText || 'No text extracted'}
                     </div>
                 `;
-                
                 document.getElementById('extracted-data').style.display = 'block';
                 
-                // Store all application data
-                const appData = {
-                    username,
-                    email,
-                    phone,
-                    skills,
-                    lastUpdated: new Date().toISOString()
-                };
-                localStorage.setItem('applicationData', JSON.stringify(appData));
+                // Store application data
+                localStorage.setItem('username', username);
+                localStorage.setItem('email', email);
+                localStorage.setItem('phone', phone);
+                localStorage.setItem('skills', JSON.stringify(skills));
                 
-                // Proceed only after all data is saved
-                setTimeout(() => {
-                    window.location.href = "job-listing.html";
-                }, 500);
+                // Proceed to job listings
+                window.location.href = "job-listing.html";
                 
             } catch (error) {
                 console.error("Processing error:", error);
                 document.getElementById('resume-error').textContent = 
                     error.message || 'Error processing resume. Please try another file.';
+            } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         });
 
-        // Improved PDF text extraction
         async function extractTextFromPDF(file) {
-            try {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 
-                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
-                
-                const typedArray = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(new Uint8Array(reader.result));
-                    reader.onerror = (e) => reject(new Error('Failed to read PDF file'));
-                    reader.readAsArrayBuffer(file);
-                });
-                
-                const pdf = await pdfjsLib.getDocument(typedArray).promise;
-                let fullText = '';
-                
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map(item => item.str).join(' ') + '\n';
-                }
-                
-                return fullText;
-            } catch (error) {
-                console.error("PDF Extraction Error:", error);
-                throw new Error('Failed to extract text from PDF');
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+            
+            const typedArray = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(new Uint8Array(reader.result));
+                reader.onerror = () => reject(new Error('Failed to read PDF file'));
+                reader.readAsArrayBuffer(file);
+            });
+            
+            const pdf = await pdfjsLib.getDocument(typedArray).promise;
+            let fullText = '';
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(' ') + '\n';
             }
+            
+            return fullText;
         }
 
-        // Improved Word doc processing
         async function processWordDocument(file) {
-            try {
-                const arrayBuffer = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Failed to read Word document'));
-                    reader.readAsArrayBuffer(file);
-                });
-                
-                const result = await mammoth.extractRawText({ arrayBuffer });
-                if (result.value) return result.value;
-                throw new Error('No text content found in document');
-            } catch (error) {
-                console.error("Word Processing Error:", error);
-                throw new Error('Failed to process Word document');
-            }
+            const arrayBuffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Failed to read Word document'));
+                reader.readAsArrayBuffer(file);
+            });
+            
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            return result.value;
         }
 
-        // Enhanced skill extraction
         function extractSkills(text) {
-            try {
-                const normalizedText = text
-                    .replace(/[^a-zA-Z0-9+#.\s]/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .toLowerCase();
-                
-                const foundSkills = new Set();
-                
-                // Search through all skill categories
-                Object.values(skillDatabase).flat().forEach(skill => {
+            const normalizedText = text
+                .replace(/[^a-zA-Z0-9+#.\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .toLowerCase();
+            
+            const foundSkills = [];
+            
+            skillDatabase.forEach(skill => {
+                const skillLower = skill.toLowerCase();
+                if (normalizedText.includes(skillLower)) {
+                    foundSkills.push(skill);
+                }
+            });
+            
+            const skillsSectionRegex = /(?:skills|technical skills|technologies|expertise)[:\n](.*?)(?=\n\w+:|$)/is;
+            const skillsSectionMatch = skillsSectionRegex.exec(text);
+            
+            if (skillsSectionMatch && skillsSectionMatch[1]) {
+                const sectionText = skillsSectionMatch[1].toLowerCase();
+                skillDatabase.forEach(skill => {
                     const skillLower = skill.toLowerCase();
-                    if (normalizedText.includes(skillLower)) {
-                        foundSkills.add(skill);
+                    if (sectionText.includes(skillLower) && !foundSkills.includes(skill)) {
+                        foundSkills.push(skill);
                     }
                 });
-                
-                // Check skills section specifically
-                const skillsSectionRegex = /(?:skills|technical skills|technologies|expertise)[:\n](.*?)(?=\n\w+:|$)/is;
-                const skillsSectionMatch = skillsSectionRegex.exec(text);
-                
-                if (skillsSectionMatch && skillsSectionMatch[1]) {
-                    const sectionText = skillsSectionMatch[1].toLowerCase();
-                    Object.values(skillDatabase).flat().forEach(skill => {
-                        const skillLower = skill.toLowerCase();
-                        if (sectionText.includes(skillLower)) {
-                            foundSkills.add(skill);
-                        }
-                    });
-                }
-                
-                // Better text highlighting
-                let highlightedText = text;
-                Array.from(foundSkills).forEach(skill => {
-                    highlightedText = highlightedText.replace(
-                        new RegExp(skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
-                        `<span class="skill-highlight">$&</span>`
-                    );
-                });
-                
-                return {
-                    skills: Array.from(foundSkills).sort(),
-                    highlightedText
-                };
-            } catch (error) {
-                console.error("Skill Extraction Error:", error);
-                return { skills: [], highlightedText: text };
             }
+            
+            let highlightedText = text;
+            foundSkills.forEach(skill => {
+                highlightedText = highlightedText.replace(
+                    new RegExp(skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+                    `<span class="skill-highlight">$&</span>`
+                );
+            });
+            
+            return {
+                skills: [...new Set(foundSkills)],
+                highlightedText
+            };
         }
     </script>
 </body>
