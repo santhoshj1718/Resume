@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Scanner & Job Finder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #output { margin-top: 20px; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f4f4f4; margin: 10px; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Upload Your Resume (PDF)</h2>
+    <input type="file" id="resumeUpload" accept=".pdf">
+    <button onclick="parseResume()">Scan Resume</button>
+
+    <h3>Extracted Skills:</h3>
+    <pre id="skillsOutput"></pre>
+
+    <h3>Matching Jobs:</h3>
+    <ul id="jobResults"></ul>
+
+    <script>
+        // Predefined job list
+        const jobList = [
+            { title: "Software Developer", skills: ["C", "Python", "Java", "HTML", "CSS", "JavaScript"] },
+            { title: "Game Developer", skills: ["C++", "Unity", "Unreal Engine"] },
+            { title: "Pentester", skills: ["Cybersecurity", "Linux", "Networking", "Penetration Testing"] },
+            { title: "Data Scientist", skills: ["Python", "Machine Learning", "Data Analysis"] },
+            { title: "Web Developer", skills: ["HTML", "CSS", "JavaScript", "PHP"] },
+            { title: "AI Engineer", skills: ["Python", "Deep Learning", "NLP", "AI"] },
+            { title: "System Administrator", skills: ["Linux", "Networking", "Cloud"] },
+            { title: "Mobile App Developer", skills: ["Java", "Kotlin", "Flutter"] },
+            { title: "Network Engineer", skills: ["CCNA", "Firewall", "Networking"] },
+            { title: "DevOps Engineer", skills: ["Docker", "Kubernetes", "CI/CD"] }
+        ];
+
+        // Extract text from PDF
+        function extractTextFromPDF(file) {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+                reader.onload = function () {
+                    let typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                        let totalText = "";
+                        let pagePromises = [];
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            pagePromises.push(
+                                pdf.getPage(i).then(page => 
+                                    page.getTextContent().then(textContent => {
+                                        let pageText = textContent.items.map(item => item.str).join(" ");
+                                        totalText += pageText + " ";
+                                    })
+                                )
+                            );
+                        }
+                        Promise.all(pagePromises).then(() => resolve(totalText));
+                    }).catch(err => reject(err));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Extract skills from text
+        function extractSkills(text) {
+            let allSkills = new Set(jobList.flatMap(job => job.skills));
+            return Array.from(allSkills).filter(skill => text.toLowerCase().includes(skill.toLowerCase()));
+        }
+
+        // Match skills with jobs
+        function findMatchingJobs(skills) {
+            return jobList.filter(job => job.skills.some(skill => skills.includes(skill))).map(job => job.title);
+        }
+
+        // Main function to process resume
+        async function parseResume() {
+            let fileInput = document.getElementById("resumeUpload");
+            if (!fileInput.files[0]) {
+                alert("Please upload a resume file!");
+                return;
+            }
+
+            try {
+                let text = await extractTextFromPDF(fileInput.files[0]);
+                let skills = extractSkills(text);
+                let jobs = findMatchingJobs(skills);
+
+                document.getElementById("skillsOutput").innerText = skills.join(", ");
+                let jobResults = document.getElementById("jobResults");
+                jobResults.innerHTML = "";
+
+                if (jobs.length === 0) {
+                    jobResults.innerHTML = "<li>No matching jobs found!</li>";
+                } else {
+                    jobs.forEach(job => {
+                        let li = document.createElement("li");
+                        li.innerText = job;
+                        jobResults.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                alert("Error reading the file!");
+            }
+        }
+    </script>
+</body>
+  </html>
