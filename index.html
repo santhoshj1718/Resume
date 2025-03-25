@@ -1,110 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Scanner & Job Finder</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <title>Job Application Form</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #output { margin-top: 20px; }
-        ul { list-style: none; padding: 0; }
-        li { background: #f4f4f4; margin: 10px; padding: 10px; border-radius: 5px; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: url(./back.jpg) no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            font-family: sans-serif;
+        }
+
+        .box {
+            width: 400px;
+            background: #f5f5f5;
+            color: red;
+            top: 50%;
+            left: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            padding: 70px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .user {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: -50px;
+            left: calc(50% - 50px);
+            border-radius: 50%;
+            background: #fff;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0 0 20px;
+            text-align: center;
+            font-size: 22px;
+            color: black;
+        }
+
+        p {
+            color: #f49126;
+            margin: 0;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="file"],
+        input[type="tel"] {
+            border: none;
+            border-bottom: 1px solid #673ab7;
+            background: transparent;
+            outline: none;
+            height: 40px;
+            color: #673ab7;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            border: none;
+            outline: none;
+            height: 40px;
+            background: #2196f3;
+            color: #fff;
+            font-size: 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background: #0097a7;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: -15px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
+
 <body>
-    <h2>Upload Your Resume (PDF Only)</h2>
-    <input type="file" id="resumeUpload" accept=".pdf">
-    <button onclick="parseResume()">Scan Resume</button>
+    <div class="box">
+        <img src="./user.png" class="user">
+        <h1>Job Application Form</h1>
 
-    <h3>Extracted Skills:</h3>
-    <pre id="skillsOutput"></pre>
+        <form id="application-form" enctype="multipart/form-data">
+            <p>Username</p>
+            <input type="text" name="uname1" id="username" placeholder="Enter Username" required>
+            <div id="username-error" class="error"></div>
 
-    <h3>Matching Jobs:</h3>
-    <ul id="jobResults"></ul>
+            <p>Email</p>
+            <input type="email" name="email" id="email" placeholder="Enter Email Id" required>
+            <div id="email-error" class="error"></div>
+
+            <p>Phone Number</p>
+            <input type="tel" name="phone" id="phone" placeholder="Enter Phone Number" required pattern="^\d{10}$" title="Please enter exactly 10 digits">
+            <div id="phone-error" class="error"></div>
+
+            <p>Upload Resume (PDF or Word)</p>
+            <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+            <div id="resume-error" class="error"></div>
+
+            <input type="submit" value="Apply Now">
+        </form>
+    </div>
 
     <script>
-        // Predefined job list
-        const jobList = [
-            { title: "Software Developer", skills: ["C", "Python", "Java", "HTML", "CSS", "JavaScript"] },
-            { title: "Game Developer", skills: ["C++", "Unity", "Unreal Engine"] },
-            { title: "Pentester", skills: ["Cybersecurity", "Linux", "Networking", "Penetration Testing"] },
-            { title: "Data Scientist", skills: ["Python", "Machine Learning", "Data Analysis"] },
-            { title: "Web Developer", skills: ["HTML", "CSS", "JavaScript", "PHP"] },
-            { title: "AI Engineer", skills: ["Python", "Deep Learning", "NLP", "AI"] },
-            { title: "System Administrator", skills: ["Linux", "Networking", "Cloud"] },
-            { title: "Mobile App Developer", skills: ["Java", "Kotlin", "Flutter"] },
-            { title: "Network Engineer", skills: ["CCNA", "Firewall", "Networking"] },
-            { title: "DevOps Engineer", skills: ["Docker", "Kubernetes", "CI/CD"] }
-        ];
-
-        // Extract text from PDF
+        document.getElementById('application-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            // Reset error messages
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            
+            // Get form values
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const resume = document.getElementById('resume').files[0];
+            
+            // Validation flags
+            let isValid = true;
+            
+            // Username validation
+            if (username.length < 3) {
+                document.getElementById('username-error').textContent = 'Username must be at least 3 characters';
+                isValid = false;
+            }
+            
+            // Email validation
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailPattern.test(email)) {
+                document.getElementById('email-error').textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+            
+            // Phone validation
+            const phonePattern = /^\d{10}$/;
+            if (!phonePattern.test(phone)) {
+                document.getElementById('phone-error').textContent = 'Please enter a valid 10-digit phone number';
+                isValid = false;
+            }
+            
+            // Resume validation
+            if (!resume) {
+                document.getElementById('resume-error').textContent = 'Please upload your resume';
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Store user data in localStorage
+            localStorage.setItem('username', username);
+            localStorage.setItem('email', email);
+            localStorage.setItem('phone', phone);
+            
+            // Process resume
+            if (resume.name.endsWith('.pdf')) {
+                processPDF(resume);
+            } else if (resume.name.endsWith('.doc') || resume.name.endsWith('.docx')) {
+                // For Word docs, we'll simulate text extraction
+                simulateWordProcessing(resume);
+            }
+        });
+        
+        function processPDF(file) {
+            // Load PDF.js library dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js';
+            script.onload = function() {
+                extractTextFromPDF(file).then(text => {
+                    const skills = extractSkills(text);
+                    localStorage.setItem('skills', JSON.stringify(skills));
+                    window.location.href = "job-listing.html";
+                }).catch(err => {
+                    console.error("Error processing PDF:", err);
+                    alert("Error processing your resume. Please try again.");
+                });
+            };
+            document.head.appendChild(script);
+        }
+        
         function extractTextFromPDF(file) {
             return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = function () {
-                    let typedarray = new Uint8Array(this.result);
-                    pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const typedarray = new Uint8Array(event.target.result);
+                    
+                    // Initialize PDF.js
+                    pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
                         let totalText = "";
-                        let pagePromises = [];
+                        const pagePromises = [];
+                        
                         for (let i = 1; i <= pdf.numPages; i++) {
                             pagePromises.push(
-                                pdf.getPage(i).then(page => 
-                                    page.getTextContent().then(textContent => {
-                                        let pageText = textContent.items.map(item => item.str).join(" ");
+                                pdf.getPage(i).then(function(page) {
+                                    return page.getTextContent().then(function(textContent) {
+                                        const pageText = textContent.items.map(item => item.str).join(" ");
                                         totalText += pageText + " ";
-                                    })
-                                )
+                                    });
+                                })
                             );
                         }
+                        
                         Promise.all(pagePromises).then(() => resolve(totalText));
-                    }).catch(err => reject(err));
+                    }).catch(reject);
                 };
+                reader.onerror = reject;
                 reader.readAsArrayBuffer(file);
             });
         }
-
-        // Extract skills from text
+        
+        function simulateWordProcessing(file) {
+            // In a real app, you would use a library like mammoth.js for Word docs
+            // Here we'll simulate it with a timeout
+            setTimeout(() => {
+                // Simulated resume text with some skills
+                const simulatedText = `
+                    John Doe's Resume
+                    Skills: JavaScript, Python, React, Node.js, HTML, CSS
+                    Experience: 5 years as a web developer
+                    Education: Computer Science Degree
+                `;
+                
+                const skills = extractSkills(simulatedText);
+                localStorage.setItem('skills', JSON.stringify(skills));
+                window.location.href = "job-listing.html";
+            }, 1000);
+        }
+        
         function extractSkills(text) {
-            let allSkills = new Set(jobList.flatMap(job => job.skills));
-            return Array.from(allSkills).filter(skill => text.toLowerCase().includes(skill.toLowerCase()));
-        }
-
-        // Match skills with jobs
-        function findMatchingJobs(skills) {
-            return jobList.filter(job => job.skills.some(skill => skills.includes(skill))).map(job => job.title);
-        }
-
-        // Main function to process resume
-        async function parseResume() {
-            let fileInput = document.getElementById("resumeUpload");
-            if (!fileInput.files[0]) {
-                alert("Please upload a resume file!");
-                return;
-            }
-
-            try {
-                let text = await extractTextFromPDF(fileInput.files[0]);
-                let skills = extractSkills(text);
-                let jobs = findMatchingJobs(skills);
-
-                document.getElementById("skillsOutput").innerText = skills.join(", ");
-                let jobResults = document.getElementById("jobResults");
-                jobResults.innerHTML = "";
-
-                if (jobs.length === 0) {
-                    jobResults.innerHTML = "<li>No matching jobs found!</li>";
-                } else {
-                    jobs.forEach(job => {
-                        let li = document.createElement("li");
-                        li.innerText = job;
-                        jobResults.appendChild(li);
-                    });
-                }
-            } catch (error) {
-                alert("Error reading the file!");
-            }
+            const allSkills = ['JavaScript', 'Python', 'React', 'Node.js', 'Java', 'C++', 
+                             'HTML', 'CSS', 'SQL', 'Git', 'Docker', 'AWS', 'PHP', 'Ruby',
+                             'Angular', 'Vue', 'TypeScript', 'MongoDB', 'PostgreSQL'];
+            
+            const foundSkills = allSkills.filter(skill => 
+                new RegExp(`\\b${skill}\\b`, 'i').test(text)
+            );
+            
+            return foundSkills.length > 0 ? foundSkills : ['No specific skills detected'];
         }
     </script>
 </body>
-</html>
+    </html>
