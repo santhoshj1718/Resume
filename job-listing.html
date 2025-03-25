@@ -1274,7 +1274,24 @@
         function displayJobs() {
             const jobsContainer = document.getElementById('jobs-container');
             jobsContainer.innerHTML = '';
-            
+    
+    // Calculate match percentage for all jobs and sort by percentage (highest first)
+            const jobsWithMatches = allJobs.map(job => {
+                const matchingSkills = job.skills.filter(skill => 
+                    currentApplication.skills.some(userSkill => 
+                        userSkill.toLowerCase() === skill.toLowerCase()
+                    )
+                );
+                const matchPercentage = Math.round((matchingSkills.length / job.skills.length) * 100);
+                return { 
+                    ...job, 
+                    matchingSkills, 
+                    matchPercentage 
+                };
+            }).sort((a, b) => b.matchPercentage - a.matchPercentage); // Sort DESC by match percentage
+    
+    // Get jobs to display (limited by displayedJobs)
+
             const jobsToShow = allJobs.slice(0, displayedJobs);
             
             if (jobsToShow.length === 0) {
