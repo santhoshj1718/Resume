@@ -190,8 +190,6 @@
             
             // DevOps/Cloud
             'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'CI/CD',
-            
-            // Add more skills as needed...
         ];
 
         document.getElementById('application-form').addEventListener('submit', async function(e) {
@@ -247,6 +245,14 @@
                     throw new Error('Unsupported file format');
                 }
                 
+                // Store resume file as Data URL
+                const reader = new FileReader();
+                reader.onload = function() {
+                    localStorage.setItem('resumeData', reader.result);
+                    localStorage.setItem('resumeFileName', resume.name);
+                };
+                reader.readAsDataURL(resume);
+
                 // Extract skills and highlight them
                 const { skills, highlightedText } = extractSkills(text);
                 
@@ -262,12 +268,11 @@
                 `;
                 document.getElementById('extracted-data').style.display = 'block';
                 
-                // Store ALL application data
+                // Store application data
                 localStorage.setItem('username', username);
                 localStorage.setItem('email', email);
                 localStorage.setItem('phone', phone);
                 localStorage.setItem('skills', JSON.stringify(skills));
-                localStorage.setItem('resumeFileName', resume.name);
                 
                 // Proceed to job listings
                 window.location.href = "job-listing.html";
@@ -282,7 +287,6 @@
         });
 
         async function extractTextFromPDF(file) {
-            // Set PDF.js worker path
             pdfjsLib.GlobalWorkerOptions.workerSrc = 
                 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
             
@@ -318,7 +322,6 @@
         }
 
         function extractSkills(text) {
-            // Normalize text for better matching
             const normalizedText = text
                 .replace(/[^a-zA-Z0-9+#.\s]/g, ' ')
                 .replace(/\s+/g, ' ')
@@ -326,7 +329,6 @@
             
             const foundSkills = [];
             
-            // 1. Exact matching against skill database
             skillDatabase.forEach(skill => {
                 const skillLower = skill.toLowerCase();
                 if (normalizedText.includes(skillLower)) {
@@ -334,7 +336,6 @@
                 }
             });
             
-            // 2. Try to find skills section
             const skillsSectionRegex = /(?:skills|technical skills|technologies|expertise)[:\n](.*?)(?=\n\w+:|$)/is;
             const skillsSectionMatch = skillsSectionRegex.exec(text);
             
@@ -348,7 +349,6 @@
                 });
             }
             
-            // Highlight skills in the text
             let highlightedText = text;
             foundSkills.forEach(skill => {
                 highlightedText = highlightedText.replace(
@@ -358,7 +358,7 @@
             });
             
             return {
-                skills: [...new Set(foundSkills)], // Remove duplicates
+                skills: [...new Set(foundSkills)],
                 highlightedText
             };
         }
