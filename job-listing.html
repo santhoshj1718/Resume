@@ -376,6 +376,27 @@
         .filter-group input[type="checkbox"] {
             margin-right: 10px;
         }
+        .matched-skill {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .missing-skill {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .missing-skills-summary {
+            color: #d32f2f;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .perfect-match {
+            color: #2e7d32;
+            margin-top: 10px;
+            font-weight: 500;
+        }
         #salary-range {
             padding: 10px;
             border-radius: 5px;
@@ -1294,37 +1315,47 @@
                 jobCard.className = `job-card ${job.matchPercentage > 50 ? 'matched' : ''}`;
                 
                 jobCard.innerHTML = `
-                    ${job.matchPercentage > 0 ? `
-                        <div class="match-percentage">${job.matchPercentage}% Match</div>
-                    ` : ''}
-                    <h3 class="job-title">${job.title}</h3>
-                    <div class="job-company">${job.company}</div>
-                    
-                    <div class="job-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
-                        <span><i class="fas fa-clock"></i> ${job.type}</span>
-                        <span><i class="fas fa-money-bill-wave"></i> ${job.salary}</span>
+                  ${job.matchPercentage > 0 ? `
+                    <div class="match-percentage">${job.matchPercentage}% Match</div>
+                  ` : ''}
+                  <h3 class="job-title">${job.title}</h3>
+                  <div class="job-company">${job.company}</div>
+  
+                  <div class="job-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
+                    <span><i class="fas fa-clock"></i> ${job.type}</span>
+                    <span><i class="fas fa-money-bill-wave"></i> ${job.salary}</span>
+                  </div>
+  
+                  <div class="job-description">${job.description}</div>
+  
+                  <div class="job-skills">
+                    <h4>Required Skills:</h4>
+                    <div class="skills-list">
+                      ${job.skills.map(skill => {
+                        const isMatched = currentApplication.skills.some(userSkill => 
+                          userSkill.toLowerCase() === skill.toLowerCase()
+                        );
+                        // Changed this line to use CSS class instead of inline style
+                        return `<span class="skill ${isMatched ? 'matched-skill' : 'missing-skill'}">${skill}</span>`;
+                      }).join('')}
                     </div>
-                    
-                    <div class="job-description">${job.description}</div>
-                    
-                    <div class="job-skills">
-                        <h4>Required Skills:</h4>
-                        <div class="skills-list">
-                            ${job.skills.map(skill => {
-                                const isMatched = currentApplication.skills.some(userSkill => 
-                                    userSkill.toLowerCase() === skill.toLowerCase()
-                                );
-                                return `<span class="skill" style="${
-                                    isMatched ? 'background: #c8e6c9; color: #2e7d32;' : ''
-                                }">${skill}</span>`;
-                            }).join('')}
-                        </div>
-                    </div>
-                    
-                    <button class="apply-btn" data-job-id="${job.id}">
-                        <i class="fas fa-paper-plane"></i> Apply Now
-                    </button>
+                    <!-- Added missing skills summary -->
+                    ${job.missingSkills?.length > 0 ? `
+                      <p class="missing-skills-summary">
+                        <i class="fas fa-exclamation-circle"></i> 
+                        <strong>Missing:</strong> ${job.missingSkills.join(', ')}
+                      </p>
+                    ` : `
+                      <p class="perfect-match">
+                        <i class="fas fa-check-circle"></i> All skills matched!
+                      </p>
+                    `}
+                  </div>
+  
+                  <button class="apply-btn" data-job-id="${job.id}">
+                    <i class="fas fa-paper-plane"></i> Apply Now
+                  </button>
                 `;
                 
                 jobCard.querySelector('.apply-btn').addEventListener('click', function(e) {
@@ -1355,12 +1386,36 @@
             statusEl.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Sending application...</p>';
             
             try {
-                // Get resume file from localStorage
+                // 1. Get resume data
                 const resumeDataURL = localStorage.getItem('resumeData');
-                if (!resumeDataURL) throw new Error('Resume not found');
+                if (!resumeDataURL) {
+                  throw new Error('Resume not found in storage');
+                }
+
+                // 2. Convert DataURL to File PROPERLY
+                const blob = await (await fetch(resumeDataURL)).blob();
+                const fileName = localStorage.getItem('resumeFileName') || 'resume.pdf';
+                const file = new File([blob], fileName, { 
+                  type: blob.type,
+                  lastModified: new Date().getTime() 
+                });
+
+                // 3. Add to templateParams
+                templateParams.resume_file = file;
+                templateParams.resume_file_name = fileName;
+                templateParams.resume_file_size = `${Math.round(blob.size / 1024)} KB`;
                 
-                const resumeFileName = localStorage.getItem('resumeFileName') || 'resume.pdf';
-                
+                // Calculate missing skills
+                templateParams.missing_skills = job.skills
+                  .filter(skill => !currentApplication.skills.some(
+                    userSkill => userSkill.toLowerCase() === skill.toLowerCase()
+                  ))
+                  .join(', ') || 'No missing skills - perfect match!';
+
+                // Add to displayJobs() for UI:
+                job.missingSkills = job.skills.filter(skill => 
+                  !currentApplication.skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
+                );
                 // Convert DataURL to Blob
                 const blob = await fetch(resumeDataURL).then(res => res.blob());
                 const file = new File([blob], resumeFileName, { type: blob.type });
