@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Listings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -156,10 +156,15 @@
         .back-btn:hover {
             text-decoration: underline;
         }
+        
+        .match-percentage {
+            font-size: 0.8em;
+            color: #4caf50;
+            font-weight: bold;
+            margin-top: 5px;
+        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
-
 <body>
     <header>
         <div class="container">
@@ -191,34 +196,52 @@
     </div>
 
     <script>
-        // Job data
+        // Comprehensive job data
         const jobList = [
             {
-                title: "Frontend Developer",
+                title: "Frontend Developer (React)",
                 company: "Tech Solutions Inc.",
                 location: "Bangalore, India",
                 type: "Full Time",
                 salary: "₹35,000 - ₹65,000",
-                skills: ["JavaScript", "HTML", "CSS", "React"],
-                description: "We are looking for a skilled Frontend Developer to join our team."
+                skills: ["JavaScript", "HTML", "CSS", "React", "Redux"],
+                description: "We need an experienced React developer to build modern web applications."
             },
             {
-                title: "Backend Developer",
+                title: "Backend Developer (Node.js)",
                 company: "Data Systems Ltd.",
                 location: "Remote",
                 type: "Full Time",
                 salary: "₹40,000 - ₹70,000",
-                skills: ["Python", "Node.js", "SQL", "Docker"],
-                description: "Join our backend team to build scalable server applications."
+                skills: ["JavaScript", "Node.js", "Express", "MongoDB", "REST API"],
+                description: "Looking for Node.js developer to create scalable backend services."
             },
             {
-                title: "Full Stack Developer",
+                title: "Full Stack Developer (MERN)",
                 company: "Web Creations",
                 location: "Chennai, India",
                 type: "Full Time",
                 salary: "₹45,000 - ₹75,000",
-                skills: ["JavaScript", "Python", "React", "Node.js"],
+                skills: ["JavaScript", "React", "Node.js", "Express", "MongoDB"],
                 description: "Full stack developer needed for end-to-end web development."
+            },
+            {
+                title: "Python Developer",
+                company: "AI Innovations",
+                location: "Hyderabad, India",
+                type: "Full Time",
+                salary: "₹50,000 - ₹80,000",
+                skills: ["Python", "Django", "Flask", "SQL", "REST API"],
+                description: "Python developer for building robust web applications."
+            },
+            {
+                title: "DevOps Engineer",
+                company: "Cloud Systems",
+                location: "Pune, India",
+                type: "Full Time",
+                salary: "₹55,000 - ₹85,000",
+                skills: ["Docker", "AWS", "CI/CD", "Linux", "Kubernetes"],
+                description: "DevOps engineer to manage our cloud infrastructure."
             },
             {
                 title: "UI/UX Designer",
@@ -226,26 +249,8 @@
                 location: "Mumbai, India",
                 type: "Part Time",
                 salary: "₹25,000 - ₹45,000",
-                skills: ["HTML", "CSS", "Figma", "Adobe XD"],
-                description: "Creative UI/UX designer to design beautiful interfaces."
-            },
-            {
-                title: "DevOps Engineer",
-                company: "Cloud Systems",
-                location: "Hyderabad, India",
-                type: "Full Time",
-                salary: "₹50,000 - ₹80,000",
-                skills: ["Docker", "AWS", "CI/CD", "Linux"],
-                description: "DevOps engineer to manage our cloud infrastructure."
-            },
-            {
-                title: "Java Developer",
-                company: "Enterprise Solutions",
-                location: "Pune, India",
-                type: "Full Time",
-                salary: "₹38,000 - ₹68,000",
-                skills: ["Java", "Spring", "Hibernate", "SQL"],
-                description: "Java developer for enterprise application development."
+                skills: ["HTML", "CSS", "Figma", "Adobe XD", "UI/UX"],
+                description: "Creative designer to create beautiful user interfaces."
             }
         ];
 
@@ -276,8 +281,8 @@
                 const noJobsElement = document.createElement('div');
                 noJobsElement.className = 'no-jobs';
                 noJobsElement.innerHTML = `
-                    <h3>No skills detected in your resume</h3>
-                    <p>We couldn't extract specific skills from your resume. Here are all available jobs:</p>
+                    <h3>No specific skills detected in your resume</h3>
+                    <p>Here are all available jobs that might interest you:</p>
                 `;
                 jobsContainer.appendChild(noJobsElement);
                 
@@ -286,56 +291,41 @@
                     jobsContainer.appendChild(createJobCard(job, []));
                 });
             } else {
-                // Find matching jobs
-                const matchingJobs = jobList.filter(job => 
-                    job.skills.some(skill => 
+                // Calculate job matches
+                const jobsWithMatches = jobList.map(job => {
+                    const matchingSkills = job.skills.filter(skill => 
                         skills.some(userSkill => 
                             userSkill.toLowerCase() === skill.toLowerCase()
                         )
-                    )
-                );
-                
-                if (matchingJobs.length === 0) {
-                    const noJobsElement = document.createElement('div');
-                    noJobsElement.className = 'no-jobs';
-                    noJobsElement.innerHTML = `
-                        <h3>No jobs match your skills exactly</h3>
-                        <p>Here are all available jobs that might interest you:</p>
-                    `;
-                    jobsContainer.appendChild(noJobsElement);
-                    
-                    // Show all jobs without matching
-                    jobList.forEach(job => {
-                        jobsContainer.appendChild(createJobCard(job, []));
-                    });
-                } else {
-                    // Show matching jobs first
-                    matchingJobs.forEach(job => {
-                        jobsContainer.appendChild(createJobCard(job, skills, true));
-                    });
-                    
-                    // Show non-matching jobs
-                    const nonMatchingJobs = jobList.filter(job => 
-                        !matchingJobs.includes(job)
                     );
-                    
-                    nonMatchingJobs.forEach(job => {
-                        jobsContainer.appendChild(createJobCard(job, skills, false));
-                    });
-                }
+                    const matchPercentage = Math.round((matchingSkills.length / job.skills.length) * 100);
+                    return { ...job, matchingSkills, matchPercentage };
+                });
+                
+                // Sort by match percentage (highest first)
+                jobsWithMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
+                
+                // Show all jobs with matching info
+                jobsWithMatches.forEach(job => {
+                    jobsContainer.appendChild(createJobCard(job, skills));
+                });
             }
         });
         
-        function createJobCard(job, userSkills, isMatch = false) {
+        function createJobCard(job, userSkills) {
             const jobCard = document.createElement('div');
-            jobCard.className = `job-card ${isMatch ? 'matched' : ''}`;
+            jobCard.className = `job-card ${job.matchingSkills?.length > 0 ? 'matched' : ''}`;
             
-            // Find matching skills
+            // Calculate matching skills
             const matchingSkills = job.skills.filter(skill => 
                 userSkills.some(userSkill => 
                     userSkill.toLowerCase() === skill.toLowerCase()
                 )
             );
+            
+            const matchPercentage = matchingSkills.length > 0 
+                ? Math.round((matchingSkills.length / job.skills.length) * 100)
+                : 0;
             
             jobCard.innerHTML = `
                 <h3 class="job-title">${job.title}</h3>
@@ -358,6 +348,11 @@
                             ">${skill}</span>
                         `).join('')}
                     </div>
+                    ${matchPercentage > 0 ? `
+                        <div class="match-percentage">
+                            ${matchPercentage}% match with your skills
+                        </div>
+                    ` : ''}
                 </div>
                 <a href="#" class="apply-btn">Apply Now</a>
             `;
