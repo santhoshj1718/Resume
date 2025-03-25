@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2196f3;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        
+        .user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .skills-section {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .skill {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .jobs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .job-card {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .job-title {
+            font-size: 1.2em;
+            margin: 0 0 10px;
+            color: #2196f3;
+        }
+        
+        .job-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .job-meta i {
+            margin-right: 5px;
+            color: #2196f3;
+        }
+        
+        .job-skills {
+            margin-top: 15px;
+        }
+        
+        .job-skills h4 {
+            margin: 0 0 10px;
+            font-size: 1em;
+        }
+        
+        .apply-btn {
+            display: inline-block;
+            background: #2196f3;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        
+        .apply-btn:hover {
+            background: #1976d2;
+        }
+        
+        .matched {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .matched .job-title {
+            color: #2e7d32;
+        }
+        
+        .no-jobs {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            grid-column: 1 / -1;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>Job Listings</h1>
+            <p>Jobs matching your skills</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="user-info">
+            <h2>Welcome, <span id="display-username">User</span>!</h2>
+            <p>Email: <span id="display-email">user@example.com</span></p>
+            <p>Phone: <span id="display-phone">1234567890</span></p>
+        </div>
+        
+        <div class="skills-section">
+            <h3>Skills Extracted from Your Resume</h3>
+            <div class="skills-list" id="skills-container">
+                <!-- Skills will be inserted here by JavaScript -->
+            </div>
+        </div>
+        
+        <h2>Recommended Jobs</h2>
+        <div class="jobs-container" id="jobs-container">
+            <!-- Job cards will be inserted here by JavaScript -->
+        </div>
+        
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Application Form</a>
+    </div>
+
+    <script>
+        // Job data
+        const jobList = [
+            {
+                title: "Frontend Developer",
+                company: "Tech Solutions Inc.",
+                location: "Bangalore, India",
+                type: "Full Time",
+                salary: "₹35,000 - ₹65,000",
+                skills: ["JavaScript", "HTML", "CSS", "React"],
+                description: "We are looking for a skilled Frontend Developer to join our team."
+            },
+            {
+                title: "Backend Developer",
+                company: "Data Systems Ltd.",
+                location: "Remote",
+                type: "Full Time",
+                salary: "₹40,000 - ₹70,000",
+                skills: ["Python", "Node.js", "SQL", "Docker"],
+                description: "Join our backend team to build scalable server applications."
+            },
+            {
+                title: "Full Stack Developer",
+                company: "Web Creations",
+                location: "Chennai, India",
+                type: "Full Time",
+                salary: "₹45,000 - ₹75,000",
+                skills: ["JavaScript", "Python", "React", "Node.js"],
+                description: "Full stack developer needed for end-to-end web development."
+            },
+            {
+                title: "UI/UX Designer",
+                company: "Design Hub",
+                location: "Mumbai, India",
+                type: "Part Time",
+                salary: "₹25,000 - ₹45,000",
+                skills: ["HTML", "CSS", "Figma", "Adobe XD"],
+                description: "Creative UI/UX designer to design beautiful interfaces."
+            },
+            {
+                title: "DevOps Engineer",
+                company: "Cloud Systems",
+                location: "Hyderabad, India",
+                type: "Full Time",
+                salary: "₹50,000 - ₹80,000",
+                skills: ["Docker", "AWS", "CI/CD", "Linux"],
+                description: "DevOps engineer to manage our cloud infrastructure."
+            },
+            {
+                title: "Java Developer",
+                company: "Enterprise Solutions",
+                location: "Pune, India",
+                type: "Full Time",
+                salary: "₹38,000 - ₹68,000",
+                skills: ["Java", "Spring", "Hibernate", "SQL"],
+                description: "Java developer for enterprise application development."
+            }
+        ];
+
+        // Display user info from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = localStorage.getItem('username') || 'User';
+            const email = localStorage.getItem('email') || 'user@example.com';
+            const phone = localStorage.getItem('phone') || '1234567890';
+            const skills = JSON.parse(localStorage.getItem('skills')) || ['No skills detected'];
+            
+            document.getElementById('display-username').textContent = username;
+            document.getElementById('display-email').textContent = email;
+            document.getElementById('display-phone').textContent = phone;
+            
+            // Display skills
+            const skillsContainer = document.getElementById('skills-container');
+            skills.forEach(skill => {
+                const skillElement = document.createElement('span');
+                skillElement.className = 'skill';
+                skillElement.textContent = skill;
+                skillsContainer.appendChild(skillElement);
+            });
+            
+            // Display jobs with matching highlights
+            const jobsContainer = document.getElementById('jobs-container');
+            
+            if (skills.length === 1 && skills[0] === 'No skills detected') {
+                const noJobsElement = document.createElement('div');
+                noJobsElement.className = 'no-jobs';
+                noJobsElement.innerHTML = `
+                    <h3>No skills detected in your resume</h3>
+                    <p>We couldn't extract specific skills from your resume. Here are all available jobs:</p>
+                `;
+                jobsContainer.appendChild(noJobsElement);
+                
+                // Show all jobs without matching
+                jobList.forEach(job => {
+                    jobsContainer.appendChild(createJobCard(job, []));
+                });
+            } else {
+                // Find matching jobs
+                const matchingJobs = jobList.filter(job => 
+                    job.skills.some(skill => 
+                        skills.some(userSkill => 
+                            userSkill.toLowerCase() === skill.toLowerCase()
+                        )
+                    )
+                );
+                
+                if (matchingJobs.length === 0) {
+                    const noJobsElement = document.createElement('div');
+                    noJobsElement.className = 'no-jobs';
+                    noJobsElement.innerHTML = `
+                        <h3>No jobs match your skills exactly</h3>
+                        <p>Here are all available jobs that might interest you:</p>
+                    `;
+                    jobsContainer.appendChild(noJobsElement);
+                    
+                    // Show all jobs without matching
+                    jobList.forEach(job => {
+                        jobsContainer.appendChild(createJobCard(job, []));
+                    });
+                } else {
+                    // Show matching jobs first
+                    matchingJobs.forEach(job => {
+                        jobsContainer.appendChild(createJobCard(job, skills, true));
+                    });
+                    
+                    // Show non-matching jobs
+                    const nonMatchingJobs = jobList.filter(job => 
+                        !matchingJobs.includes(job)
+                    );
+                    
+                    nonMatchingJobs.forEach(job => {
+                        jobsContainer.appendChild(createJobCard(job, skills, false));
+                    });
+                }
+            }
+        });
+        
+        function createJobCard(job, userSkills, isMatch = false) {
+            const jobCard = document.createElement('div');
+            jobCard.className = `job-card ${isMatch ? 'matched' : ''}`;
+            
+            // Find matching skills
+            const matchingSkills = job.skills.filter(skill => 
+                userSkills.some(userSkill => 
+                    userSkill.toLowerCase() === skill.toLowerCase()
+                )
+            );
+            
+            jobCard.innerHTML = `
+                <h3 class="job-title">${job.title}</h3>
+                <div class="job-meta">
+                    <span><i class="fas fa-building"></i> ${job.company}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
+                </div>
+                <div class="job-meta">
+                    <span><i class="fas fa-clock"></i> ${job.type}</span>
+                    <span><i class="fas fa-money-bill-wave"></i> ${job.salary}</span>
+                </div>
+                <p>${job.description}</p>
+                <div class="job-skills">
+                    <h4>Required Skills:</h4>
+                    <div class="skills-list">
+                        ${job.skills.map(skill => `
+                            <span class="skill" style="
+                                ${matchingSkills.includes(skill) ? 
+                                    'background: #c8e6c9; color: #2e7d32;' : ''}
+                            ">${skill}</span>
+                        `).join('')}
+                    </div>
+                </div>
+                <a href="#" class="apply-btn">Apply Now</a>
+            `;
+            
+            return jobCard;
+        }
+    </script>
+</body>
+</html>
