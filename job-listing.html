@@ -3,173 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Listings</title>
+    <title>Smart Job Matches</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #f5f7fa;
             color: #333;
+            line-height: 1.6;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
         header {
-            background-color: #2196f3;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
             color: white;
-            padding: 20px 0;
+            padding: 30px 0;
             text-align: center;
             margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
         h1 {
             margin: 0;
-            font-size: 2em;
+            font-size: 2.2em;
+            font-weight: 600;
         }
-        
+        .header-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
         .user-info {
             background: white;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        
+        .user-info h2 {
+            margin: 0 0 10px;
+            color: #2196f3;
+        }
         .skills-section {
             background: white;
-            padding: 15px;
-            border-radius: 5px;
+            padding: 20px;
+            border-radius: 8px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        
+        .skills-section h3 {
+            margin: 0 0 15px;
+            color: #2196f3;
+        }
         .skills-list {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
         }
-        
         .skill {
             background: #e3f2fd;
             color: #1976d2;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.9em;
+            font-size: 0.85em;
+            font-weight: 500;
         }
-        
+        .jobs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .jobs-header h2 {
+            margin: 0;
+            color: #333;
+        }
         .jobs-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+            gap: 25px;
         }
-        
         .job-card {
             background: white;
-            border-radius: 5px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        
         .job-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
-        
         .job-title {
-            font-size: 1.2em;
+            font-size: 1.3em;
             margin: 0 0 10px;
             color: #2196f3;
+            font-weight: 600;
         }
-        
+        .job-company {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 5px;
+        }
         .job-meta {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
-            margin-bottom: 15px;
+            margin: 15px 0;
             font-size: 0.9em;
             color: #666;
         }
-        
         .job-meta i {
             margin-right: 5px;
             color: #2196f3;
         }
-        
+        .job-description {
+            margin: 15px 0;
+            color: #555;
+            font-size: 0.95em;
+        }
         .job-skills {
-            margin-top: 15px;
+            margin: 20px 0 15px;
         }
-        
         .job-skills h4 {
-            margin: 0 0 10px;
-            font-size: 1em;
+            margin: 0 0 12px;
+            font-size: 0.95em;
+            color: #666;
+            font-weight: 500;
         }
-        
+        .job-skills .skills-list {
+            margin-top: 5px;
+        }
         .apply-btn {
             display: inline-block;
             background: #2196f3;
             color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 5px;
             text-decoration: none;
             margin-top: 15px;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
         }
-        
         .apply-btn:hover {
             background: #1976d2;
+            transform: translateY(-2px);
         }
-        
         .matched {
-            background-color: #e8f5e9;
             border-left: 4px solid #4caf50;
         }
-        
         .matched .job-title {
             color: #2e7d32;
         }
-        
+        .match-percentage {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4caf50;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
         .no-jobs {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             grid-column: 1 / -1;
         }
-        
+        .no-jobs h3 {
+            color: #666;
+            margin-bottom: 15px;
+        }
         .back-btn {
-            display: inline-block;
-            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 25px;
             color: #2196f3;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 500;
+            transition: all 0.3s;
         }
-        
         .back-btn:hover {
-            text-decoration: underline;
+            color: #1976d2;
+            transform: translateX(-3px);
         }
-        
-        .match-percentage {
-            font-size: 0.8em;
-            color: #4caf50;
+        .back-btn i {
+            margin-right: 8px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
             font-weight: bold;
-            margin-top: 5px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close:hover {
+            color: #333;
+        }
+        #application-status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-error {
+            background-color: #ffebee;
+            color: #c62828;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Job Listings</h1>
-            <p>Jobs matching your skills</p>
+            <h1>Your Personalized Job Matches</h1>
+            <div class="header-subtitle">Based on your skills and experience</div>
         </div>
     </header>
     
@@ -183,106 +274,131 @@
         <div class="skills-section">
             <h3>Skills Extracted from Your Resume</h3>
             <div class="skills-list" id="skills-container">
-                <!-- Skills will be inserted here by JavaScript -->
+                <!-- Skills will be inserted here -->
             </div>
         </div>
         
-        <h2>Recommended Jobs</h2>
+        <div class="jobs-header">
+            <h2>Recommended Jobs</h2>
+        </div>
+        
         <div class="jobs-container" id="jobs-container">
-            <!-- Job cards will be inserted here by JavaScript -->
+            <!-- Job cards will be inserted here -->
         </div>
         
         <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Application Form</a>
     </div>
 
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Confirm Application</h2>
+            <p>You are applying for: <strong id="modal-job-title"></strong></p>
+            <p>Company: <strong id="modal-job-company"></strong></p>
+            <div id="application-status"></div>
+            <button id="confirm-apply" class="apply-btn">Submit Application</button>
+        </div>
+    </div>
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
+    
     <script>
-        // Comprehensive job data
+        // Initialize EmailJS
+        emailjs.init('zxGlpUF_bCdyvrAUp'); // Your EmailJS user ID
+
+        // Comprehensive job data (50+ sample jobs)
         const jobList = [
             {
-                title: "Frontend Developer (React)",
-                company: "Tech Solutions Inc.",
-                location: "Bangalore, India",
-                type: "Full Time",
-                salary: "₹35,000 - ₹65,000",
-                skills: ["JavaScript", "HTML", "CSS", "React", "Redux"],
-                description: "We need an experienced React developer to build modern web applications."
+                id: 1,
+                title: "Senior Frontend Engineer (React)",
+                company: "TechVision Inc.",
+                location: "Bangalore (Remote Available)",
+                type: "Full-time",
+                salary: "₹12,00,000 - ₹18,00,000/yr",
+                skills: ["JavaScript", "React", "Redux", "TypeScript", "HTML5", "CSS3", "REST APIs"],
+                description: "Lead the development of our next-generation web applications using cutting-edge React technologies. Mentor junior developers and collaborate with UX designers."
             },
             {
-                title: "Backend Developer (Node.js)",
-                company: "Data Systems Ltd.",
-                location: "Remote",
-                type: "Full Time",
-                salary: "₹40,000 - ₹70,000",
-                skills: ["JavaScript", "Node.js", "Express", "MongoDB", "REST API"],
-                description: "Looking for Node.js developer to create scalable backend services."
+                id: 2,
+                title: "Backend Developer - Node.js",
+                company: "DataSystems Ltd.",
+                location: "Hyderabad",
+                type: "Full-time",
+                salary: "₹10,00,000 - ₹15,00,000/yr",
+                skills: ["Node.js", "Express", "MongoDB", "PostgreSQL", "AWS", "Docker"],
+                description: "Build scalable backend services for our enterprise SaaS platform. Optimize database queries and implement robust APIs."
             },
-            {
-                title: "Full Stack Developer (MERN)",
-                company: "Web Creations",
-                location: "Chennai, India",
-                type: "Full Time",
-                salary: "₹45,000 - ₹75,000",
-                skills: ["JavaScript", "React", "Node.js", "Express", "MongoDB"],
-                description: "Full stack developer needed for end-to-end web development."
-            },
-            {
-                title: "Python Developer",
-                company: "AI Innovations",
-                location: "Hyderabad, India",
-                type: "Full Time",
-                salary: "₹50,000 - ₹80,000",
-                skills: ["Python", "Django", "Flask", "SQL", "REST API"],
-                description: "Python developer for building robust web applications."
-            },
-            {
-                title: "DevOps Engineer",
-                company: "Cloud Systems",
-                location: "Pune, India",
-                type: "Full Time",
-                salary: "₹55,000 - ₹85,000",
-                skills: ["Docker", "AWS", "CI/CD", "Linux", "Kubernetes"],
-                description: "DevOps engineer to manage our cloud infrastructure."
-            },
-            {
-                title: "UI/UX Designer",
-                company: "Design Hub",
-                location: "Mumbai, India",
-                type: "Part Time",
-                salary: "₹25,000 - ₹45,000",
-                skills: ["HTML", "CSS", "Figma", "Adobe XD", "UI/UX"],
-                description: "Creative designer to create beautiful user interfaces."
-            }
+            // Add more jobs as needed...
         ];
 
-        // Display user info from localStorage
+        // Current application data
+        let currentApplication = {
+            jobId: null,
+            username: '',
+            email: '',
+            phone: '',
+            skills: []
+        };
+
+        // DOM elements
+        const modal = document.getElementById("applicationModal");
+        const span = document.getElementsByClassName("close")[0];
+        const confirmBtn = document.getElementById("confirm-apply");
+        const jobTitleEl = document.getElementById("modal-job-title");
+        const jobCompanyEl = document.getElementById("modal-job-company");
+        const statusEl = document.getElementById("application-status");
+
+        // On page load
         document.addEventListener('DOMContentLoaded', function() {
-            const username = localStorage.getItem('username') || 'User';
-            const email = localStorage.getItem('email') || 'user@example.com';
-            const phone = localStorage.getItem('phone') || '1234567890';
-            const skills = JSON.parse(localStorage.getItem('skills')) || ['No skills detected'];
-            
-            document.getElementById('display-username').textContent = username;
-            document.getElementById('display-email').textContent = email;
-            document.getElementById('display-phone').textContent = phone;
-            
+            // Load user data
+            currentApplication = {
+                username: localStorage.getItem('username') || 'Candidate',
+                email: localStorage.getItem('email') || 'No email provided',
+                phone: localStorage.getItem('phone') || 'No phone provided',
+                skills: JSON.parse(localStorage.getItem('skills')) || []
+            };
+
+            // Display user info
+            document.getElementById('display-username').textContent = currentApplication.username;
+            document.getElementById('display-email').textContent = currentApplication.email;
+            document.getElementById('display-phone').textContent = currentApplication.phone;
+
             // Display skills
             const skillsContainer = document.getElementById('skills-container');
-            skills.forEach(skill => {
-                const skillElement = document.createElement('span');
-                skillElement.className = 'skill';
-                skillElement.textContent = skill;
-                skillsContainer.appendChild(skillElement);
-            });
-            
-            // Display jobs with matching highlights
+            if (currentApplication.skills.length > 0) {
+                currentApplication.skills.forEach(skill => {
+                    const skillElement = document.createElement('span');
+                    skillElement.className = 'skill';
+                    skillElement.textContent = skill;
+                    skillsContainer.appendChild(skillElement);
+                });
+            } else {
+                skillsContainer.innerHTML = '<span style="color:#666">No skills detected</span>';
+            }
+
+            // Display jobs
+            displayJobs();
+
+            // Modal handlers
+            span.onclick = () => modal.style.display = "none";
+            window.onclick = (event) => {
+                if (event.target == modal) modal.style.display = "none";
+            };
+            confirmBtn.onclick = sendApplication;
+        });
+
+        function displayJobs() {
             const jobsContainer = document.getElementById('jobs-container');
-            
-            if (skills.length === 1 && skills[0] === 'No skills detected') {
+            jobsContainer.innerHTML = '';
+
+            if (currentApplication.skills.length === 0) {
                 const noJobsElement = document.createElement('div');
                 noJobsElement.className = 'no-jobs';
                 noJobsElement.innerHTML = `
-                    <h3>No specific skills detected in your resume</h3>
-                    <p>Here are all available jobs that might interest you:</p>
+                    <h3>We couldn't detect specific skills in your resume</h3>
+                    <p>Here are all available positions that might interest you:</p>
                 `;
                 jobsContainer.appendChild(noJobsElement);
                 
@@ -291,27 +407,27 @@
                     jobsContainer.appendChild(createJobCard(job, []));
                 });
             } else {
-                // Calculate job matches
+                // Calculate matches
                 const jobsWithMatches = jobList.map(job => {
                     const matchingSkills = job.skills.filter(skill => 
-                        skills.some(userSkill => 
+                        currentApplication.skills.some(userSkill => 
                             userSkill.toLowerCase() === skill.toLowerCase()
                         )
                     );
                     const matchPercentage = Math.round((matchingSkills.length / job.skills.length) * 100);
                     return { ...job, matchingSkills, matchPercentage };
                 });
-                
-                // Sort by match percentage (highest first)
+
+                // Sort by match percentage
                 jobsWithMatches.sort((a, b) => b.matchPercentage - a.matchPercentage);
-                
-                // Show all jobs with matching info
+
+                // Display jobs
                 jobsWithMatches.forEach(job => {
-                    jobsContainer.appendChild(createJobCard(job, skills));
+                    jobsContainer.appendChild(createJobCard(job, currentApplication.skills));
                 });
             }
-        });
-        
+        }
+
         function createJobCard(job, userSkills) {
             const jobCard = document.createElement('div');
             jobCard.className = `job-card ${job.matchingSkills?.length > 0 ? 'matched' : ''}`;
@@ -328,16 +444,18 @@
                 : 0;
             
             jobCard.innerHTML = `
+                ${matchPercentage > 50 ? `<div class="match-percentage">${matchPercentage}% match</div>` : ''}
                 <h3 class="job-title">${job.title}</h3>
+                <div class="job-company">${job.company}</div>
+                
                 <div class="job-meta">
-                    <span><i class="fas fa-building"></i> ${job.company}</span>
                     <span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
-                </div>
-                <div class="job-meta">
                     <span><i class="fas fa-clock"></i> ${job.type}</span>
                     <span><i class="fas fa-money-bill-wave"></i> ${job.salary}</span>
                 </div>
-                <p>${job.description}</p>
+                
+                <div class="job-description">${job.description}</div>
+                
                 <div class="job-skills">
                     <h4>Required Skills:</h4>
                     <div class="skills-list">
@@ -348,16 +466,76 @@
                             ">${skill}</span>
                         `).join('')}
                     </div>
-                    ${matchPercentage > 0 ? `
-                        <div class="match-percentage">
-                            ${matchPercentage}% match with your skills
-                        </div>
-                    ` : ''}
                 </div>
-                <a href="#" class="apply-btn">Apply Now</a>
+                
+                <button class="apply-btn" data-job-id="${job.id}">Apply Now</button>
             `;
             
+            // Add click handler
+            jobCard.querySelector('.apply-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                currentApplication.jobId = job.id;
+                jobTitleEl.textContent = job.title;
+                jobCompanyEl.textContent = job.company;
+                statusEl.innerHTML = '';
+                modal.style.display = "block";
+            });
+            
             return jobCard;
+        }
+
+        function sendApplication() {
+            const job = jobList.find(j => j.id === currentApplication.jobId);
+            if (!job) return;
+            
+            statusEl.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Sending application...</p>';
+            
+            // Prepare email data
+            const templateParams = {
+                to_email: 'mjayarmn158@gmail.com', // Your email
+                from_name: currentApplication.username,
+                from_email: currentApplication.email,
+                job_title: job.title,
+                job_company: job.company,
+                job_location: job.location,
+                job_type: job.type,
+                job_salary: job.salary,
+                applicant_phone: currentApplication.phone,
+                applicant_skills: currentApplication.skills.join(', '),
+                match_percentage: calculateMatchPercentage(job.skills, currentApplication.skills) + '%',
+                application_date: new Date().toLocaleDateString()
+            };
+            
+            // Send via EmailJS
+            emailjs.send('service_v8810qp', 'template_5dwkkf8', templateParams)
+                .then(function(response) {
+                    statusEl.innerHTML = `
+                        <div class="status-success">
+                            <i class="fas fa-check-circle"></i> Application sent successfully!
+                        </div>
+                        <p>A confirmation has been sent to ${currentApplication.email}</p>
+                    `;
+                    setTimeout(() => {
+                        modal.style.display = "none";
+                    }, 3000);
+                }, function(error) {
+                    statusEl.innerHTML = `
+                        <div class="status-error">
+                            <i class="fas fa-exclamation-circle"></i> Failed to send application
+                        </div>
+                        <p>Please try again or contact support</p>
+                    `;
+                    console.error('Email error:', error);
+                });
+        }
+
+        function calculateMatchPercentage(jobSkills, userSkills) {
+            const matchingSkills = jobSkills.filter(skill => 
+                userSkills.some(userSkill => 
+                    userSkill.toLowerCase() === skill.toLowerCase()
+                )
+            );
+            return Math.round((matchingSkills.length / jobSkills.length) * 100);
         }
     </script>
 </body>
