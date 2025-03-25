@@ -1091,14 +1091,6 @@
         const statusEl = document.getElementById("application-status");
         const filterModal = document.getElementById("filterModal");
 
-        // Convert Data URL to File
-        function dataURLtoFile(dataurl, filename) {
-            var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--) u8arr[n] = bstr.charCodeAt(n);
-            return new File([u8arr], filename, {type:mime});
-        }
-
         // Calculate match percentage
         function calculateMatchPercentage(jobSkills, userSkills) {
             if (!userSkills || userSkills.length === 0) return 0;
@@ -1108,7 +1100,7 @@
                 userSkillsLower.includes(jobSkill.toLowerCase())
             );
             
-            return (matchedSkills.length / jobSkills.length) * 100;
+            return Math.round((matchedSkills.length / jobSkills.length) * 100);
         }
 
         // On page load
@@ -1275,24 +1267,17 @@
             const jobsContainer = document.getElementById('jobs-container');
             jobsContainer.innerHTML = '';
     
-    // Calculate match percentage for all jobs and sort by percentage (highest first)
+            // Calculate match percentage for all jobs and sort by percentage (highest first)
             const jobsWithMatches = allJobs.map(job => {
-                const matchingSkills = job.skills.filter(skill => 
-                    currentApplication.skills.some(userSkill => 
-                        userSkill.toLowerCase() === skill.toLowerCase()
-                    )
-                );
-                const matchPercentage = Math.round((matchingSkills.length / job.skills.length) * 100);
+                const matchPercentage = calculateMatchPercentage(job.skills, currentApplication.skills);
                 return { 
                     ...job, 
-                    matchingSkills, 
                     matchPercentage 
                 };
-            }).sort((a, b) => b.matchPercentage - a.matchPercentage); // Sort DESC by match percentage
+            }).sort((a, b) => b.matchPercentage - a.matchPercentage);
     
-    // Get jobs to display (limited by displayedJobs)
-
-            const jobsToShow = allJobs.slice(0, displayedJobs);
+            // Get jobs to display (limited by displayedJobs)
+            const jobsToShow = jobsWithMatches.slice(0, displayedJobs);
             
             if (jobsToShow.length === 0) {
                 jobsContainer.innerHTML = `
@@ -1305,13 +1290,12 @@
             }
             
             jobsToShow.forEach(job => {
-                const matchPercentage = calculateMatchPercentage(job.skills, currentApplication.skills);
                 const jobCard = document.createElement('div');
-                jobCard.className = `job-card ${matchPercentage > 50 ? 'matched' : ''}`;
+                jobCard.className = `job-card ${job.matchPercentage > 50 ? 'matched' : ''}`;
                 
                 jobCard.innerHTML = `
-                    ${matchPercentage > 0 ? `
-                        <div class="match-percentage">${Math.round(matchPercentage)}% Match</div>
+                    ${job.matchPercentage > 0 ? `
+                        <div class="match-percentage">${job.matchPercentage}% Match</div>
                     ` : ''}
                     <h3 class="job-title">${job.title}</h3>
                     <div class="job-company">${job.company}</div>
@@ -1370,58 +1354,72 @@
             
             statusEl.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Sending application...</p>';
             
-            // Get resume file from localStorage
-            const resumeDataURL = localStorage.getItem('resumeData');
-            const resumeFileName = localStorage.getItem('resumeFileName');
-            const resumeFile = dataURLtoFile(resumeDataURL, resumeFileName);
+            try {
+                // Get resume file from localStorage
+                const resumeDataURL = localStorage.getItem('resumeData');
+                if (!resumeDataURL) throw new Error('Resume not found');
+                
+                const resumeFileName = localStorage.getItem('resumeFileName') || 'resume.pdf';
+                
+                // Convert DataURL to Blob
+                const blob = await fetch(resumeDataURL).then(res => res.blob());
+                const file = new File([blob], resumeFileName, { type: blob.type });
+                
+                // Calculate match percentage
+                const matchPercentage = calculateMatchPercentage(job.skills, currentApplication.skills);
+                
+                // Prepare email parameters
+                const templateParams = {
+                    to_email: 'mjayarmn158@gmail.com',
+                    applicant_name: currentApplication.username,
+                    applicant_email: currentApplication.email,
+                    applicant_phone: currentApplication.phone,
+                    job_title: job.title,
+                    job_company: job.company,
+                    job_location: job.location,
+                    job_type: job.type,
+                    job_salary: job.salary,
+                    applicant_skills: currentApplication.skills.join(', ') || 'No skills detected',
+                    match_percentage: matchPercentage,
+                    application_date: new Date().toLocaleDateString('en-US', {
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    resume_file: file
+                };
 
-            // Calculate match percentage
-            const matchPercentage = calculateMatchPercentage(job.skills, currentApplication.skills);
-            
-            // Prepare email parameters
-            const templateParams = {
-                to_email: 'mjayarmn158@gmail.com',
-                applicant_name: currentApplication.username,
-                applicant_email: currentApplication.email,
-                applicant_phone: currentApplication.phone,
-                job_title: job.title,
-                job_company: job.company,
-                job_location: job.location,
-                job_type: job.type,
-                job_salary: job.salary,
-                applicant_skills: currentApplication.skills.join(', ') || 'No skills detected',
-                match_percentage: Math.round(matchPercentage),
-                application_date: new Date().toLocaleDateString('en-US', {
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }),
-                resume_file: resumeFile
-            };
-
-            // Send via EmailJS
-            emailjs.send('service_v8810qp', 'template_5dwkkf8', templateParams)
-                .then(function(response) {
-                    statusEl.innerHTML = `
-                        <div class="status-success">
-                            <i class="fas fa-check-circle"></i> Application sent successfully!
-                        </div>
-                        <p>A confirmation has been sent to ${currentApplication.email}</p>
-                    `;
-                    setTimeout(() => {
-                        modal.style.display = "none";
-                    }, 3000);
-                }, function(error) {
-                    statusEl.innerHTML = `
-                        <div class="status-error">
-                            <i class="fas fa-exclamation-circle"></i> Failed to send application
-                        </div>
-                        <p>Error: ${error.text || 'Unknown error'}</p>
-                        <p>Please try again or contact support</p>
-                    `;
-                });
+                // Send via EmailJS
+                emailjs.send('service_v8810qp', 'template_5dwkkf8', templateParams)
+                    .then(function(response) {
+                        statusEl.innerHTML = `
+                            <div class="status-success">
+                                <i class="fas fa-check-circle"></i> Application sent successfully!
+                            </div>
+                            <p>A confirmation has been sent to ${currentApplication.email}</p>
+                        `;
+                        setTimeout(() => {
+                            modal.style.display = "none";
+                        }, 3000);
+                    }, function(error) {
+                        statusEl.innerHTML = `
+                            <div class="status-error">
+                                <i class="fas fa-exclamation-circle"></i> Failed to send application
+                            </div>
+                            <p>Error: ${error.text || 'Unknown error'}</p>
+                            <p>Please try again or contact support</p>
+                        `;
+                    });
+            } catch (error) {
+                statusEl.innerHTML = `
+                    <div class="status-error">
+                        <i class="fas fa-exclamation-circle"></i> Error preparing application
+                    </div>
+                    <p>${error.message}</p>
+                `;
+            }
         }
     </script>
 </body>
