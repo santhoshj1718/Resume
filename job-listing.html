@@ -238,7 +238,6 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background: #4caf50;
             color: white;
             padding: 5px 12px;
             border-radius: 15px;
@@ -503,7 +502,7 @@
         // Initialize EmailJS with your User ID
         emailjs.init('zxGlpUF_bCdyvrAUp');
         
-        // Comprehensive job data (50+ sample jobs)
+        // Comprehensive job data (50 sample jobs)
         const jobList = [
             {
                 id: 1,
@@ -512,7 +511,7 @@
                 location: "Bangalore (Remote Available)",
                 type: "Full-time",
                 salary: "₹12,00,000 - ₹18,00,000/yr",
-                skills: ["JavaScript", "React", "Redux", "TypeScript", "HTML", "CSS", "REST APIs"],
+                skills: ["JavaScript", "React", "Redux", "TypeScript", "HTML5", "CSS3", "REST APIs"],
                 description: "Lead the development of our next-generation web applications using cutting-edge React technologies. Mentor junior developers and collaborate with UX designers to create exceptional user experiences.",
                 experience: "Senior"
             },
@@ -902,17 +901,6 @@
                 experience: "Mid"
             },
             {
-                id: 36,
-                title: "Vue.js Developer",
-                company: "ModernWeb",
-                location: "Chennai",
-                type: "Full-time",
-                salary: "₹9,00,000 - ₹14,00,000/yr",
-                skills: ["Vue.js", "JavaScript", "HTML5", "CSS3", "REST API", "State Management"],
-                description: "Develop modern web applications using Vue.js framework. Implement responsive designs and optimize for performance.",
-                experience: "Mid"
-            },
-            {
                 id: 37,
                 title: "Data Visualization Specialist",
                 company: "Visual Insights",
@@ -1090,6 +1078,14 @@
         const jobCompanyEl = document.getElementById("modal-job-company");
         const statusEl = document.getElementById("application-status");
         const filterModal = document.getElementById("filterModal");
+
+        // Helper function for percentage color coding
+        function getPercentageColor(percentage) {
+            if (percentage >= 80) return '#4caf50'; // Green
+            if (percentage >= 50) return '#8bc34a'; // Light green
+            if (percentage >= 30) return '#ffc107'; // Yellow
+            return '#f44336'; // Red
+        }
 
         // Convert Data URL to File
         function dataURLtoFile(dataurl, filename) {
@@ -1275,7 +1271,7 @@
             const jobsContainer = document.getElementById('jobs-container');
             jobsContainer.innerHTML = '';
     
-    // Calculate match percentage for all jobs and sort by percentage (highest first)
+            // Calculate match percentage for all jobs and sort by percentage (highest first)
             const jobsWithMatches = allJobs.map(job => {
                 const matchingSkills = job.skills.filter(skill => 
                     currentApplication.skills.some(userSkill => 
@@ -1290,9 +1286,8 @@
                 };
             }).sort((a, b) => b.matchPercentage - a.matchPercentage); // Sort DESC by match percentage
     
-    // Get jobs to display (limited by displayedJobs)
-
-            const jobsToShow = allJobs.slice(0, displayedJobs);
+            // Get jobs to display (limited by displayedJobs)
+            const jobsToShow = jobsWithMatches.slice(0, displayedJobs);
             
             if (jobsToShow.length === 0) {
                 jobsContainer.innerHTML = `
@@ -1305,14 +1300,13 @@
             }
             
             jobsToShow.forEach(job => {
-                const matchPercentage = calculateMatchPercentage(job.skills, currentApplication.skills);
                 const jobCard = document.createElement('div');
-                jobCard.className = `job-card ${matchPercentage > 50 ? 'matched' : ''}`;
+                jobCard.className = `job-card ${job.matchPercentage > 50 ? 'matched' : ''}`;
                 
                 jobCard.innerHTML = `
-                    ${matchPercentage > 0 ? `
-                        <div class="match-percentage">${Math.round(matchPercentage)}% Match</div>
-                    ` : ''}
+                    <div class="match-percentage" style="background-color: ${getPercentageColor(job.matchPercentage)}">
+                        ${job.matchPercentage}% Match
+                    </div>
                     <h3 class="job-title">${job.title}</h3>
                     <div class="job-company">${job.company}</div>
                     
@@ -1325,12 +1319,10 @@
                     <div class="job-description">${job.description}</div>
                     
                     <div class="job-skills">
-                        <h4>Required Skills:</h4>
+                        <h4>Required Skills (${job.matchingSkills.length}/${job.skills.length} matched):</h4>
                         <div class="skills-list">
                             ${job.skills.map(skill => {
-                                const isMatched = currentApplication.skills.some(userSkill => 
-                                    userSkill.toLowerCase() === skill.toLowerCase()
-                                );
+                                const isMatched = job.matchingSkills.includes(skill);
                                 return `<span class="skill" style="${
                                     isMatched ? 'background: #c8e6c9; color: #2e7d32;' : ''
                                 }">${skill}</span>`;
